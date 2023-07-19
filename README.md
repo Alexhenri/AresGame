@@ -72,7 +72,7 @@ This section lists the project requirements, serving as a reference for the impl
 # My Demo
 
 ## AresUnityDemo
-
+- Don't forget to open the scene SampleScene in Assets.
 - AresUnityDemo works totally on Unity.
   
   At start:
