@@ -68,3 +68,85 @@ This section lists the project requirements, serving as a reference for the impl
 - The system must run on a Linux operating system.
 - Documentation must be written in English.
 - The project shall be added to a Git repository.
+
+# My Demo
+
+## AresUnityDemo
+
+- AresUnityDemo works totally on Unity.
+  
+  At start:
+  - Creates a random number of prefab targets.
+  - Creates an environment with:
+    - Terrain
+    - Directional Light (Default of Unity)
+    - Canvas with Crosshair
+    - TankPlayer
+  - Starts listening to TCP connections (IP: 127.0.0.1, Port: 8037)
+  - Log shows what move is getting from AresGameInput
+  
+  Commands to play:
+  1. Enter - Start the game.
+  2. Movement of the Tank:
+    - W: Forward
+    - S: Backward
+    - A: Right
+    - D: Left
+  3. Cannon:
+    - Mouse: Control the camera. Left and Right, Up and Down.
+    - Space: Fire.
+  4. Esc: Exit the game.
+
+## AresGameInput
+  
+  Build Instructions:
+  1. Open a terminal or command prompt.
+  2. Navigate to the root directory of the project.
+  3. Create a build directory and navigate into it:
+     ```
+     mkdir build
+     cd build
+     ```
+  4. Generate the build files using CMake:
+     ```
+     cmake ..
+     ```
+  5. Build the project:
+     ```
+     cmake --build .
+     ```
+  6. The executable should now be generated in the build directory.  
+     ```
+     ./ares_game
+     ```
+  
+  At start, connects to AresUnityDemo, then send inputs on the keyboard to it.
+
+  (NOT IMPLEMENTED)
+  Commands to play:
+  1. P - Play the game.
+  2. Movement of the Tank:
+    - W: Forward
+    - S: Backward
+    - A: Right
+    - D: Left
+  3. Cannon Tower:
+    - I: Up
+    - K: Down
+    - J: Spin Right
+    - L: Spin Left
+    - Space: Fire.
+
+  Log is AresGameLog.txt - The log file is generated in the same directory where the executable was called.
+
+## NOT IMPLEMENTED
+
+- All AresGameInput control over AresUnityDemo. Now, AresUnityDemo can work independently. It can even see which inputs AresGameInput sends, but it doesn't use it.
+- Response from AresGameInput to AresUnityDemo.
+- End Game Controller. Does not end the game, either by time or by the end of targets.
+
+## POTENTIAL IMPROVEMENTS
+
+- Everything that is not implemented.
+- The crosshair to facilitate the aim. Two cameras and a button to change the camera view, that is focusing on the tank, to the cannon, may facilitate the aim. Like a third-person shooter.
+- Code, there's always something to improve.
