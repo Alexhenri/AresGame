@@ -32,7 +32,7 @@ public class Game : MonoBehaviour
     }
 	void Update() {
 
-		if(lock_start_game == false && Input.GetKeyDown("enter")) {
+		if(lock_start_game == false && (Input.GetKeyDown("return") || Input.GetKeyDown("enter"))) {
 			StartGame();
 			lock_start_game = true;
 		}
