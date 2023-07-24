@@ -125,17 +125,19 @@ This section lists the project requirements, serving as a reference for the impl
   (NOT IMPLEMENTED)
   Commands to play:
   1. P - Play the game.
-  2. Movement of the Tank:
-    - W: Forward
-    - S: Backward
-    - A: Right
-    - D: Left
-  3. Cannon Tower:
-    - I: Up
-    - K: Down
-    - J: Spin Right
-    - L: Spin Left
-    - Space: Fire.
+  2. Esc - Close the game.
+  3. Movement of the Tank:
+     - W: Forward
+     - S: Backward
+     - A: Right
+     - D: Left
+  4. Cannon Tower:
+     - I: Up
+     - K: Down
+     - J: Spin Right
+     - L: Spin Left
+     - Space: Fire.
+
 
   Log is AresGameLog.txt - The log file is generated in the same directory where the executable was called.
 
