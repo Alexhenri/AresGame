@@ -25,3 +25,4 @@ set(HEADERS
 # Executável principal
 add_executable(ares_game ${SOURCES} ${HEADERS})
 target_link_libraries(ares_game pthread)
+target_link_libraries(ares_game ncurses)
