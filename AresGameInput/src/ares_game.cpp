@@ -24,26 +24,25 @@
 
 //Control cannon
 #define M_KEY_FIRE 32 // M_KEY_SPACE
-#define M_KEY_C_UP 105 // M_KEY_W
-#define M_KEY_C_DOWN 107 // M_KEY_S
-#define M_KEY_C_LEFT 106 // M_KEY_A
-#define M_KEY_C_RIGHT 108 // M_KEY_D
+#define M_KEY_C_UP 105 // M_KEY_I
+#define M_KEY_C_DOWN 107 // M_KEY_K
+#define M_KEY_C_LEFT 106 // M_KEY_J
+#define M_KEY_C_RIGHT 108 // M_KEY_L
 
 //Aux
-#define M_KEY_PLAY 112 // M_KEY_P
+#define M_KEY_PLAY 10 // M_KEY_START ENTER BUTTON, CARRIAGE RETURN IS 13, BUT LINE FEED IS 10
 #define M_KEY_EXIT 27 // M_KEY_ESC
 
 TcpClient tcp_client;
 
-std::string getMove(int move)
-{
+std::string getMove(int move) {
     switch(move){
         case M_KEY_PLAY:
             return "Start";
         case M_KEY_EXIT:
             return "Exit";
         case M_KEY_UP:
-            return "Foward";
+            return "Forward";
         case M_KEY_DOWN:
             return "Backward";
         case M_KEY_LEFT:
@@ -63,7 +62,6 @@ std::string getMove(int move)
 	    default:
             return "ERROR";
     }
-
 }
 
 std::string strFmt(const std::string& format, ...) {
@@ -90,8 +88,7 @@ std::string strFmt(const std::string& format, ...) {
     return std::string(buffer.data());
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
     TcpClient tcp_client;
     bool game_on = true;
@@ -117,24 +114,19 @@ int main(int argc, char *argv[])
 
             key = getch();
             value = key;
-
             logger.log(strFmt("Players is trying to %s", getMove(value).c_str()));
-            if(tcp_client.send_data(getMove(value)))
-            {
-                   // response = tcp_client.receive(512);
-                    logger.log(response);
-                    if(response == "Finished"){
-                        game_on = false;
-                    }
-
+            if(tcp_client.send_data(getMove(value))) {
+                response = tcp_client.receive(512);
+                logger.log(response);
+                if(response == "Finished"){
+                    game_on = false;
+                }
             } else {
-                    //logger.log(strFmt("Error while trying to %s", getMove(value)));
+                logger.log(strFmt("Error while trying to %s", getMove(value)));
             }
-	    if(key == M_KEY_EXIT){
-		break;
-	    }
-
-
+	        if(key == M_KEY_EXIT) {
+		        break;
+    	    }
         }
 	endwin();
         logger.log("Disconnected to AresGame Demo\n");    
