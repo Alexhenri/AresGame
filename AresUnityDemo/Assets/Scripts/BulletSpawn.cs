@@ -13,7 +13,7 @@ public class BulletSpawn : MonoBehaviour
         }
     }
 
-    void SpawnBullet() {
+    public void SpawnBullet() {
         Vector3 spawnPosition = transform.position;
         Quaternion spawnRotation = transform.rotation;
 

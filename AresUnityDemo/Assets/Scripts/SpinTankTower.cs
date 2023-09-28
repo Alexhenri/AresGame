@@ -10,4 +10,8 @@ public class SpinTankTower : MonoBehaviour
         float inputX = Input.GetAxis("Mouse X") * mouseSensitivity;
         transform.Rotate(Vector3.up * inputX);
     }
+
+    public void SpinTank(float inputX) {
+        transform.Rotate(Vector3.up * inputX);
+    }
 }

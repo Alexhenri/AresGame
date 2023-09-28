@@ -7,29 +7,40 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 
+
 public class Game : MonoBehaviour 
 {
     public GameObject targetPrefab;
     public GameObject environmentGame;
-    public int numberTargetPrefabs;
 	public bool lock_start_game;
+	
+	// --- Target Manager --- //
+	public int startedNumberTargetPrefabs;
+	private int currentNumberTargetPrefabs;
+	private int numberOfTargetEffects;
 
-	#region private members 	 	
+	// --- Fire Manager --- //
+	private int numberOfBullets;
+
+	// --- TCP VARS --- //	
 	private TcpListener tcpListener; // TCPListener to listen for incomming TCP connection requests
-		
-	private Thread tcpListenerThread; // Background thread for TcpServer workload	 	
-	private TcpClient connectedTcpClient; // Create handle to connected tcp client		
-	#endregion 	
+	private TcpClient connectedTcpClient; // Create handle to connected tcp client
+	private NetworkStream stream;
 
+	
+	private Tank tankPlayer;
+	private BulletSpawn bulletSpawn;
+	private SpinTankTower tankTower;
+	private UpDownCanon tankCanon;
 
-    void Start() {
+	private async void Start() {
 
-		tcpListenerThread = new Thread (new ThreadStart(ListenForIncommingRequests)); 		
-		tcpListenerThread.IsBackground = true; 		
-		tcpListenerThread.Start(); 
+		numberOfBullets = 0;
+		lock_start_game = false;
+		ListenForIncommingRequests();
 
-		lock_start_game = false;	
-    }
+	}
+
 	void Update() {
 
 		if(lock_start_game == false && (Input.GetKeyDown("return") || Input.GetKeyDown("enter"))) {
@@ -41,7 +52,7 @@ public class Game : MonoBehaviour
         }
 	}
 
-    private void ListenForIncommingRequests() { 		
+    private async void ListenForIncommingRequests() { 		
 		try { 			
 			// Create listener on localhost port 8037. 			
 			tcpListener = new TcpListener(IPAddress.Parse("127.0.0.1"), 8037); 			
@@ -50,12 +61,12 @@ public class Game : MonoBehaviour
 			Byte[] bytes = new Byte[1024];  
 
 			while (true) { 				
-				using (connectedTcpClient = tcpListener.AcceptTcpClient()) { 					
+				using (connectedTcpClient = await tcpListener.AcceptTcpClientAsync()) { 			
 					// Get a stream object for reading 					
 					using (NetworkStream stream = connectedTcpClient.GetStream()) { 						
 						int length; 						
 						// Read incomming stream into byte array. 						
-						while ((length = stream.Read(bytes, 0, bytes.Length)) != 0) { 							
+						while ((length = await stream.ReadAsync(bytes, 0, bytes.Length)) != 0) { 							
 							var incommingData = new byte[length]; 							
 							Array.Copy(bytes, 0, incommingData, 0, length);  							
 							// Convert byte array to string message. 							
@@ -69,58 +80,74 @@ public class Game : MonoBehaviour
 		catch (SocketException socketException) { 			
 			Debug.Log("SocketException " + socketException.ToString()); 		
 		}     
-	}  	
-
+	} 
+	
     private void MessageTreatment(string msg) {
 		Debug.Log(msg);
         switch (msg) {
 			case "Fire":
-				// function fire():
-				//		number_of_fired_bullets += 1;
-				//		if bullet hits target
-				//			number = how many target are there yet
-				//			if no more targets
-				//				function that end game
-				//			else 
-				//				msg returning number
-				//		else
-				//			msg returning fired and missed.
+				fireBullet();
                 break;
             case "Start":
-				// function start():
-				// 		starts the enviroment 
-				//		check how many how many prefab target were generated
-				//		msg returning "Game Started" and the number of prefab targets created
+				if(lock_start_game == false){
+                	StartGame();
+					SendMessage("Game started with " + startedNumberTargetPrefabs + " targets.");;
+				} else {
+					SendMessage("Game already started with " + startedNumberTargetPrefabs + " targets.");;
+				}
                 break;
             case "Forward":
+				moveForward();
+				SendMessage("Player tried and succeeded");
+				break;
             case "Backward":
+				moveBackward();
+				SendMessage("Player tried and succeeded");
+				break;
             case "Left":
+				moveLeft();
+				SendMessage("Player tried and succeeded");
+				break;
             case "Right":
+				moveRight();
+				SendMessage("Player tried and succeeded");
+				break;
             case "Down":
+				downCanon();
+				SendMessage("Player tried and succeeded");
+				break;
             case "Up":
+				upCanon();
+				SendMessage("Player tried and succeeded");
+				break;
             case "SpinR":
+				spinRight();
+				SendMessage("Player tried and succeeded");
+				break;
             case "SpinL":
-				// sendMessage("Player tried and succeeded")
+				spinLeft();
+				SendMessage("Player tried and succeeded");
+				break;
             default:
-				// sendMessage("What are you trying to do?")
+				SendMessage("What are you trying to do?");
                 break;
         }
     }
 
-    public void SendMessage() { 		
+    private void SendMessage(string msg) { 		
 		if (connectedTcpClient == null) {             
 			return;         
 		}  		
 		try { 			
 			// Get a stream object for writing 			
-			NetworkStream stream = connectedTcpClient.GetStream(); 			
+			stream = connectedTcpClient.GetStream(); 			
 			if (stream.CanWrite) {                 
-				string serverMessage = "This is a message from your server."; 			
+				string serverMessage = msg; 			
 				// Convert string message to byte array                 
 				byte[] serverMessageAsByteArray = Encoding.ASCII.GetBytes(serverMessage); 				
 				// Write byte array to socketConnection stream               
 				stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);               
-				Debug.Log("Server sent his message - should be received by client");           
+				//Debug.Log("Server sent his message - should be received by client");           
 			}       
 		} 		
 		catch (SocketException socketException) {             
@@ -139,8 +166,8 @@ public class Game : MonoBehaviour
     }
 
     private IEnumerator SpawnTargets() {
-        numberTargetPrefabs = UnityEngine.Random.Range(5, 15);
-        for (int i = 0; i < numberTargetPrefabs; i++) {
+        startedNumberTargetPrefabs = UnityEngine.Random.Range(5, 15);
+        for (int i = 0; i < startedNumberTargetPrefabs; i++) {
             yield return SpawnSingleTarget();
         }
         yield return null;
@@ -152,13 +179,106 @@ public class Game : MonoBehaviour
         yield return null;
     }
 
-    private void StartGame() {
-        if(lock_start_game == false){
-            
-            StartCoroutine(SpawnEnviromentGame());
-            StartCoroutine(SpawnTargets());
-            lock_start_game = true;
-        }
-		
+    private void StartGame() {      
+        StartCoroutine(SpawnEnviromentGame());
+        StartCoroutine(SpawnTargets());
+        lock_start_game = true;
     }
+
+	private void moveForward() {
+		// // Find the tankplayer
+		tankPlayer = FindObjectOfType<Tank>();
+        if (tankPlayer != null){
+			tankPlayer.MoveTank(1);
+			tankPlayer.RotateWheels(1, 0);
+        }
+	}
+	private void moveBackward() {
+		// // Find the tankplayer
+		tankPlayer = FindObjectOfType<Tank>();
+        if (tankPlayer != null){
+			tankPlayer.MoveTank(-1);
+			tankPlayer.RotateWheels(-1, 0);
+        }
+	}
+	private void moveLeft() {
+		// // Find the tankplayer
+		tankPlayer = FindObjectOfType<Tank>();
+        if (tankPlayer != null){
+			tankPlayer.RotateTank(-1);
+			tankPlayer.RotateWheels(0, -1);
+        }
+	}
+	private void moveRight() {
+		// // Find the tankplayer
+		tankPlayer = FindObjectOfType<Tank>();
+        if (tankPlayer != null){
+			tankPlayer.RotateTank(1);
+			tankPlayer.RotateWheels(0, 1);
+        }
+	}
+	private void spinRight() {
+		// // Find the tank tower
+		tankTower = FindObjectOfType<SpinTankTower>();
+        if (tankTower != null){
+			tankTower.SpinTank(1);
+        }
+	}
+	private void spinLeft() {
+		// // Find the tankplayer
+		tankTower = FindObjectOfType<SpinTankTower>();
+        if (tankTower != null){
+			tankTower.SpinTank(-1);
+        }
+	}
+	private void upCanon() {
+		// // Find the tankplayer
+		tankCanon = FindObjectOfType<UpDownCanon>();
+        if (tankCanon != null){
+			tankCanon.MoveVertically(1);
+        }
+	}
+	private void downCanon() {
+		// // Find the tankplayer
+		tankCanon = FindObjectOfType<UpDownCanon>();
+        if (tankCanon != null){
+			tankCanon.MoveVertically(-1);
+        }
+	}
+
+	private void fireBullet() {
+		// Find all effects in scene
+        GameObject[] destroyEffects = GameObject.FindGameObjectsWithTag("DestroyEffect");
+		numberOfTargetEffects = destroyEffects.Length;
+		
+		bulletSpawn = FindObjectOfType<BulletSpawn>();
+		if (bulletSpawn != null){
+			bulletSpawn.SpawnBullet();
+			numberOfBullets += 1;
+
+        } else {
+			SendMessage("Error while trying to fire!!");
+		}
+
+		// Find all effects in scene
+		destroyEffects = GameObject.FindGameObjectsWithTag("DestroyEffect");
+
+		// Check if hit
+		if (numberOfTargetEffects < destroyEffects.Length) {
+			currentNumberTargetPrefabs -= 1;
+			// Check if there is not more targets
+			if (currentNumberTargetPrefabs == 0) {
+				// end game function()
+				SendMessage("You hit the target!! No more targets left.");
+			} else {
+				SendMessage("You hit the target!! " + currentNumberTargetPrefabs + "targets left.");
+			}
+		} else {
+			SendMessage("You missed the target!!");
+		}
+	}
+
+	public void hitTarget() {
+
+	}
 }

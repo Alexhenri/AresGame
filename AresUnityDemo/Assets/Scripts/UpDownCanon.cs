@@ -19,4 +19,11 @@ public class UpDownCanon : MonoBehaviour
         cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -maximumRotation, -minimumRotation);
         transform.localEulerAngles = Vector3.right * cameraVerticalRotation;
     }
+
+    public void MoveVertically(float inputY) {
+        // Up and Down
+        cameraVerticalRotation -= inputY;
+        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -maximumRotation, -minimumRotation);
+        transform.localEulerAngles = Vector3.right * cameraVerticalRotation;
+    }
 }

@@ -32,16 +32,17 @@ public class Tank : MonoBehaviour
 
     }
     
-    void MoveTank(float input) {
+    public void MoveTank(float input) {
         Vector3 moveDirection = transform.forward * input * moveSpeed * Time.fixedDeltaTime;
         rb.MovePosition(rb.position + moveDirection);
     }
-    void RotateTank(float input) {
+    public void RotateTank(float input) {
         float rotation = input * rotationSpeed * Time.fixedDeltaTime;
         Quaternion turnRotation = Quaternion.Euler(0.0f, rotation, 0.0f);
         rb.MoveRotation(rb.rotation * turnRotation);
     }
-    void RotateWheels(float moveInput, float rotationInput) {
+    public void RotateWheels(float moveInput, float rotationInput) {
+
         float wheelRotation = moveInput * rotationSpeed * Time.deltaTime;
 
         //Move the left wheels
