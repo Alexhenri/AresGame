@@ -5,7 +5,7 @@
 #include <ctime>
 
 Logger::Logger() {
-    logFile.open("AresGameLog.txt");
+    logFile.open("AresGameLog.txt", std::ios::app);
 }
 
 std::string Logger::getCurrentTimestamp() const {
