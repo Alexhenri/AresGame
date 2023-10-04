@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
                     game_on = false;
                 }
             } else {
-                logger.log(strFmt("Error while trying to %s", getMove(value)));
+                logger.log(strFmt("Error while trying to %s", getMove(value).c_str()));
             }
 	        if(key == M_KEY_EXIT) {
 		        break;
