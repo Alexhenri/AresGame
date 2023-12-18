@@ -115,7 +115,12 @@ This section lists the project requirements, serving as a reference for the impl
      ```
      cmake --build .
      ```
-  6. The executable should now be generated in the build directory.  
+     **Note:** Make sure to install the ncurses library before compiling :
+               ```
+                 sudo apt-get install libncurses5-dev libncursesw5-dev
+               ```
+     
+  7. The executable should now be generated in the build directory.  
      ```
      ./ares_game
      ```
